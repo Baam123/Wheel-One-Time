@@ -248,7 +248,7 @@
       <script src="js/hc-canvas-luckwheel.js"></script>
       <script>
         // ⚠️ QUAN TRỌNG: Thay YOUR_SCRIPT_URL bằng Web App URL từ Google Apps Script
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/home/projects/create?parentId=1nGBbPbuIZ6xQ9xQYUHT9Z7rH23CwdBcwIDRvUFo2D6I/exec';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxxGlSrB72tzdkHpWEEqAw43XaJZ8B2pULbAQUnav0EKyaK0B02bWHDgAUxt_Hdqsj_3A/exec';
 
         var isPercentage = true;
         var currentPrizeText = ''; // Lưu tên giải thưởng
@@ -504,9 +504,9 @@
           try {
             const response = await fetch(GOOGLE_SCRIPT_URL, {
               method: 'POST',
-              mode: 'no-cors',
+              mode: 'no-cors', // Giữ cái này nếu bạn không muốn xử lý lỗi CORS phức tạp
               headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'text/plain', // Thay đổi thành text/plain để vượt qua bộ lọc CORS
               },
               body: JSON.stringify(formData)
             });
