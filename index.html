@@ -210,7 +210,7 @@
       <!-- Form Modal -->
       <div class="prize-form-modal" id="prizeFormModal">
         <div class="prize-form-content">
-          <h2>🎉 Chúc mừng bạn!</h2>
+          <h2>🎉 Chúc mừng bạn 🎉</h2>
           <div class="prize-display-box" id="prizeDisplayBox"></div>
 
           <form id="winnerForm">
@@ -248,7 +248,7 @@
       <script src="js/hc-canvas-luckwheel.js"></script>
       <script>
         // ⚠️ QUAN TRỌNG: Thay YOUR_SCRIPT_URL bằng Web App URL từ Google Apps Script
-        const GOOGLE_SCRIPT_URL = 'YOUR_SCRIPT_URL';
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/home/projects/create?parentId=1nGBbPbuIZ6xQ9xQYUHT9Z7rH23CwdBcwIDRvUFo2D6I';
 
         var isPercentage = true;
         var currentPrizeText = ''; // Lưu tên giải thưởng
@@ -267,7 +267,7 @@
         function showAlreadyPlayedMessage() {
           Swal.fire({
             title: 'Đã hết lượt chơi!',
-            text: 'Bạn đã quay vòng quay rồi. Mỗi người chỉ được quay 1 lần thôi',
+            text: 'Bạn đã quay vòng quay rồi. Mỗi người chỉ có 1 cơ hội thôi nha',
             icon: 'warning',
             confirmButtonText: 'Đã hiểu',
             backdrop: false,
@@ -292,7 +292,8 @@
           {
             text: "Chuột Bluetooth",
             img: "images/chuot2.png",
-            percentpage: 0.48
+            // percentpage: 0.48
+            percentpage: 0.78
           },
           {
             text: "Bình nước",
@@ -307,7 +308,8 @@
           {
             text: "Chúc bạn may mắn lần sau",
             img: "images/hengaplai.png",
-            percentpage: 0.48
+            // percentpage: 0.48
+            percentpage: 0.18
           },
           {
             text: "Gấu bông",
@@ -328,7 +330,7 @@
 
         // Kiểm tra tổng xác suất
         const totalProbability = prizes.reduce((sum, p) => sum + p.percentpage, 0);
-        console.log("✅ Tổng xác suất:", totalProbability.toFixed(2));
+        console.log("Tổng xác suất:", totalProbability.toFixed(2));
 
         const Toast = Swal.mixin({
           toast: true,
@@ -421,7 +423,7 @@
                     // KHÔNG TRÚNG - chỉ hiện thông báo
                     originalSwal.fire({
                       title: 'Lần này bạn chưa may mắn lắm',
-                      text: 'Chúc bạn may mắn lần sau. Bạn đã hết lượt chơi!',
+                      text: 'Chúc bạn may mắn lần sau.',
                       imageUrl: prizeImg || './images/hengaplai.png',
                       imageWidth: 100,
                       imageHeight: 100,
