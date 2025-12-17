@@ -203,7 +203,7 @@
           <div class="hc-luckywheel-container">
             <canvas class="hc-luckywheel-canvas" width="500" height="500">Vòng Xoay May Mắn</canvas>
           </div>
-          <a class="hc-luckywheel-btn" href="javascript:;">Xoay</a>
+          <a class="hc-luckywheel-btn" href="javascript:;" id="spinButton">Xoay</a>
         </section>
       </div>
 
@@ -248,7 +248,7 @@
       <script src="js/hc-canvas-luckwheel.js"></script>
       <script>
         // ⚠️ QUAN TRỌNG: Thay YOUR_SCRIPT_URL bằng Web App URL từ Google Apps Script
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/home/projects/create?parentId=1nGBbPbuIZ6xQ9xQYUHT9Z7rH23CwdBcwIDRvUFo2D6I';
+        const GOOGLE_SCRIPT_URL = 'YOUR_SCRIPT_URL';
 
         var isPercentage = true;
         var currentPrizeText = ''; // Lưu tên giải thưởng
@@ -275,18 +275,23 @@
           });
         }
 
+        function disableSpinButton() {
+          const btn = document.querySelector('.hc-luckywheel-btn');
+          btn.style.pointerEvents = 'none';
+          btn.style.opacity = '0.5';
+          btn.style.cursor = 'not-allowed';
+        }
+
         // Tổng xác suất = 1.0 chính xác
         var prizes = [
           {
             text: "Chúc bạn may mắn lần sau",
             img: "images/hengaplai.png",
-            // percentpage: 0.48
             percentpage: 0.01
           },
           {
             text: "Chuột Bluetooth",
             img: "images/chuot2.png",
-            // percentpage: 0.01
             percentpage: 0.48
           },
           {
@@ -338,14 +343,7 @@
         document.addEventListener(
           "DOMContentLoaded",
           function () {
-            // KIỂM TRA NGAY KHI TẢI TRANG
-            if (hasPlayed()) {
-              document.querySelector('.hc-luckywheel-btn').style.pointerEvents = 'none';
-              document.querySelector('.hc-luckywheel-btn').style.opacity = '0.5';
-              showAlreadyPlayedMessage();
-              return;
-            }
-
+            // LUÔN KHỞI TẠO VÒNG QUAY ĐỂ HIỂN THỊ
             hcLuckywheel.init({
               id: "luckywheel",
               config: function (callback) {
@@ -353,6 +351,12 @@
               },
               mode: "both",
               getPrize: function (callback) {
+                // KIỂM TRA NGAY KHI CLICK NÚT QUAY
+                if (hasPlayed()) {
+                  showAlreadyPlayedMessage();
+                  return; // Không gọi callback -> không quay
+                }
+
                 var rand = randomIndex(prizes);
                 var chances = rand;
                 callback && callback([rand, chances]);
@@ -417,7 +421,7 @@
                     // KHÔNG TRÚNG - chỉ hiện thông báo
                     originalSwal.fire({
                       title: 'Lần này bạn chưa may mắn lắm',
-                      text: 'Chúc bạn may mắn lần sau',
+                      text: 'Chúc bạn may mắn lần sau. Bạn đã hết lượt chơi!',
                       imageUrl: prizeImg || './images/hengaplai.png',
                       imageWidth: 100,
                       imageHeight: 100,
@@ -431,8 +435,7 @@
                       imageAlt: 'Logo ITC'
                     }).then(() => {
                       // Vô hiệu hóa nút quay
-                      document.querySelector('.hc-luckywheel-btn').style.pointerEvents = 'none';
-                      document.querySelector('.hc-luckywheel-btn').style.opacity = '0.5';
+                      disableSpinButton();
                     }).catch(err => {
                       console.error("Lỗi hiển thị popup:", err);
                     });
@@ -444,6 +447,15 @@
                 }, 100);
               }
             });
+
+            // KIỂM TRA SAU KHI KHỞI TẠO XONG
+            if (hasPlayed()) {
+              disableSpinButton();
+              // Hiện popup ngay khi vào trang
+              setTimeout(() => {
+                showAlreadyPlayedMessage();
+              }, 500);
+            }
           },
           false
         );
@@ -456,19 +468,19 @@
           let rand = Math.random();
           let cumulativeProbability = 0;
 
-          console.log("🎲 Random value:", rand.toFixed(4));
+          console.log("Random value:", rand.toFixed(4));
 
           for (let i = 0; i < prizes.length; i++) {
             cumulativeProbability += prizes[i].percentpage;
             console.log(`  Index ${i}: cumulative = ${cumulativeProbability.toFixed(4)}`);
 
             if (rand < cumulativeProbability) {
-              console.log(`✅ Selected: Index ${i} - ${prizes[i].text}`);
+              console.log(`Selected: Index ${i} - ${prizes[i].text}`);
               return i;
             }
           }
 
-          console.warn("⚠️ Fallback to last prize");
+          console.warn("Fallback to last prize");
           return prizes.length - 1;
         }
 
@@ -504,7 +516,7 @@
 
               Swal.fire({
                 title: 'Thành công!',
-                text: 'Thông tin của bạn đã được ghi nhận. Đội ngũ admin sẽ nhanh chóng liên lạc với bạn để xác nhận thông tin giải thưởng!',
+                text: 'Thông tin của bạn đã được ghi nhận. Đội ngũ admin sẽ nhanh chóng liên lạc với bạn để xác nhận thông tin nhận thưởng!',
                 icon: 'success',
                 confirmButtonText: 'OK',
                 backdrop: false,
@@ -514,8 +526,7 @@
                 document.getElementById('winnerForm').style.display = 'block';
 
                 // Vô hiệu hóa nút quay
-                document.querySelector('.hc-luckywheel-btn').style.pointerEvents = 'none';
-                document.querySelector('.hc-luckywheel-btn').style.opacity = '0.5';
+                disableSpinButton();
               });
             }, 1000);
 
