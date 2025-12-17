@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vòng Quay May Mắn ITC</title>
+  <link rel="stylesheet" href="css/typo/typo.css" />
+  <link rel="stylesheet" href="css/hc-canvas-luckwheel.css" />
+  <link rel="stylesheet" href="css/custom-styles.css" />
+
+  <link href="./images/hengaplai.png" rel="icon" type="image/x-icon" />
+
+  <style>
+    /* Form Modal Styles */
+    .prize-form-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 10000;
+      justify-content: center;
+      align-items: center;
+      animation: fadeIn 0.3s;
+    }
+
+    .prize-form-modal.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    .prize-form-content {
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      animation: slideUp 0.3s;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(50px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .prize-form-content h2 {
+      color: #1E90FF;
+      margin-bottom: 10px;
+      font-size: 28px;
+      text-align: center;
+    }
+
+    .prize-display-box {
+      background: linear-gradient(135deg, #1E90FF 0%, #0066CC 100%);
+      color: white;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 25px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #333;
+      font-weight: 600;
+      font-size: 15px;
+    }
+
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border-color 0.3s;
+      font-family: inherit;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #1E90FF;
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 25px;
+    }
+
+    .form-btn {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .form-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-submit {
+      background: linear-gradient(45deg, #1E90FF 0%, #0066CC 100%);
+      color: white;
+    }
+
+    .btn-cancel {
+      background: #f0f0f0;
+      color: #666;
+    }
+
+    .form-loading {
+      display: none;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .form-loading.active {
+      display: block;
+    }
+
+    .form-spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #1E90FF;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .prize-form-content {
+        padding: 25px;
+      }
+
+      .prize-form-content h2 {
+        font-size: 22px;
+      }
+
+      .prize-display-box {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+
+<body class="bg">
+  <div id="content" class="container">
+    <div id="post">
+      <div class="wrapper typo" id="wrapper">
+        <section id="luckywheel" class="hc-luckywheel">
+          <div class="hc-luckywheel-container">
+            <canvas class="hc-luckywheel-canvas" width="500" height="500">Vòng Xoay May Mắn</canvas>
+          </div>
+          <a class="hc-luckywheel-btn" href="javascript:;">Xoay</a>
+        </section>
+      </div>
+
+      <!-- Form Modal -->
+      <div class="prize-form-modal" id="prizeFormModal">
+        <div class="prize-form-content">
+          <h2>🎉 Chúc mừng bạn!</h2>
+          <div class="prize-display-box" id="prizeDisplayBox"></div>
+
+          <form id="winnerForm">
+            <div class="form-group">
+              <label for="fullName">Họ và tên *</label>
+              <input type="text" id="fullName" name="fullName" required placeholder="Nguyễn Văn A">
+            </div>
+
+            <div class="form-group">
+              <label for="phoneNumber">Số điện thoại *</label>
+              <input type="tel" id="phoneNumber" name="phoneNumber" required placeholder="0912345678"
+                pattern="[0-9]{10,11}">
+            </div>
+
+            <div class="form-group">
+              <label for="userAddress">Địa chỉ *</label>
+              <textarea id="userAddress" name="userAddress" required
+                placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố"></textarea>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="form-btn btn-cancel" id="cancelFormBtn">Đóng</button>
+              <button type="submit" class="form-btn btn-submit">Gửi thông tin</button>
+            </div>
+          </form>
+
+          <div class="form-loading" id="formLoading">
+            <div class="form-spinner"></div>
+            <p style="margin-top: 10px; color: #666;">Đang gửi...</p>
+          </div>
+        </div>
+      </div>
+
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+      <script src="js/hc-canvas-luckwheel.js"></script>
+      <script>
+        // ⚠️ QUAN TRỌNG: Thay YOUR_SCRIPT_URL bằng Web App URL từ Google Apps Script
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/home/projects/create?parentId=1nGBbPbuIZ6xQ9xQYUHT9Z7rH23CwdBcwIDRvUFo2D6I';
+
+        var isPercentage = true;
+        var currentPrizeText = ''; // Lưu tên giải thưởng
+
+        // KIỂM TRA XEM ĐÃ QUAY CHƯA
+        const STORAGE_KEY = 'itc_wheel_played';
+
+        function hasPlayed() {
+          return localStorage.getItem(STORAGE_KEY) === 'true';
+        }
+
+        function markAsPlayed() {
+          localStorage.setItem(STORAGE_KEY, 'true');
+        }
+
+        function showAlreadyPlayedMessage() {
+          Swal.fire({
+            title: 'Đã hết lượt chơi!',
+            text: 'Bạn đã quay vòng quay rồi. Mỗi người chỉ được quay 1 lần thôi',
+            icon: 'warning',
+            confirmButtonText: 'Đã hiểu',
+            backdrop: false,
+            allowOutsideClick: false
+          });
+        }
+
+        // Tổng xác suất = 1.0 chính xác
+        var prizes = [
+          {
+            text: "Chúc bạn may mắn lần sau",
+            img: "images/hengaplai.png",
+            // percentpage: 0.48
+            percentpage: 0.01
+          },
+          {
+            text: "Chuột Bluetooth",
+            img: "images/chuot2.png",
+            // percentpage: 0.01
+            percentpage: 0.48
+          },
+          {
+            text: "Bình nước",
+            img: "images/binh.png",
+            percentpage: 0.02
+          },
+          {
+            text: "USB 3.2 Kingston",
+            img: "images/usb.png",
+            percentpage: 0.01
+          },
+          {
+            text: "Chúc bạn may mắn lần sau",
+            img: "images/hengaplai.png",
+            percentpage: 0.48
+          },
+          {
+            text: "Gấu bông",
+            img: "images/gaubong.png",
+            percentpage: 0.00
+          },
+          {
+            text: "Quà bí ẩn",
+            img: "images/gift_Y.png",
+            percentpage: 0.00
+          },
+          {
+            text: "Balo ITC",
+            img: "images/balo1.png",
+            percentpage: 0.00
+          },
+        ];
+
+        // Kiểm tra tổng xác suất
+        const totalProbability = prizes.reduce((sum, p) => sum + p.percentpage, 0);
+        console.log("✅ Tổng xác suất:", totalProbability.toFixed(2));
+
+        const Toast = Swal.mixin({
+          toast: true,
+          position: 'center',
+          showConfirmButton: false,
+          timer: 8000,
+          timerProgressBar: true,
+          background: 'rgba(255, 255, 255, 0)',
+          backdrop: false,
+        });
+
+        document.addEventListener(
+          "DOMContentLoaded",
+          function () {
+            // KIỂM TRA NGAY KHI TẢI TRANG
+            if (hasPlayed()) {
+              document.querySelector('.hc-luckywheel-btn').style.pointerEvents = 'none';
+              document.querySelector('.hc-luckywheel-btn').style.opacity = '0.5';
+              showAlreadyPlayedMessage();
+              return;
+            }
+
+            hcLuckywheel.init({
+              id: "luckywheel",
+              config: function (callback) {
+                callback && callback(prizes);
+              },
+              mode: "both",
+              getPrize: function (callback) {
+                var rand = randomIndex(prizes);
+                var chances = rand;
+                callback && callback([rand, chances]);
+              },
+              gotBack: function (data, index) {
+                console.log("=== GOTBACK CALLED ===");
+                console.log("Raw data:", data);
+                console.log("Index:", index);
+
+                // ĐÁNH DẤU ĐÃ QUAY NGAY SAU KHI QUAY XONG
+                markAsPlayed();
+
+                // TẮT TOÀN BỘ SWEETALERT TỪ THƯ VIỆN
+                const originalSwal = window.Swal;
+                window.Swal = {
+                  fire: function () {
+                    console.log("Swal.fire blocked from library");
+                    return Promise.resolve();
+                  }
+                };
+
+                // Lấy thông tin prize
+                let prizeText = '';
+                let prizeImg = '';
+
+                if (typeof index === 'number' && prizes[index]) {
+                  prizeText = prizes[index].text;
+                  prizeImg = prizes[index].img;
+                } else if (typeof data === 'string') {
+                  prizeText = data;
+                  let foundPrize = prizes.find(p => p.text === data);
+                  prizeImg = foundPrize ? foundPrize.img : '';
+                }
+
+                console.log("Final prize text:", prizeText);
+                console.log("Final prize img:", prizeImg);
+
+                // Lưu tên giải để dùng khi submit form
+                currentPrizeText = prizeText;
+
+                setTimeout(() => {
+                  // KHÔI PHỤC LẠI SWAL
+                  window.Swal = originalSwal;
+
+                  if (!window.Swal || !window.Swal.fire) {
+                    console.error("SweetAlert2 không khả dụng");
+                    alert(`Chúc mừng! Bạn đã trúng: ${prizeText}`);
+                    return;
+                  }
+
+                  // Xử lý các trường hợp
+                  if (data == null || prizeText == null) {
+                    originalSwal.fire({
+                      title: 'Chương trình kết thúc',
+                      text: 'Đã hết phần thưởng',
+                      icon: 'error',
+                      confirmButtonText: 'Đóng',
+                      backdrop: false,
+                      allowOutsideClick: false
+                    });
+                  } else if (prizeText === 'Chúc bạn may mắn lần sau' || prizeText.includes('may mắn')) {
+                    // KHÔNG TRÚNG - chỉ hiện thông báo
+                    originalSwal.fire({
+                      title: 'Lần này bạn chưa may mắn lắm',
+                      text: 'Chúc bạn may mắn lần sau',
+                      imageUrl: prizeImg || './images/hengaplai.png',
+                      imageWidth: 100,
+                      imageHeight: 100,
+                      confirmButtonText: 'OK',
+                      backdrop: false,
+                      allowOutsideClick: false,
+                      customClass: {
+                        popup: 'simple-swal-popup',
+                        confirmButton: 'simple-swal-button'
+                      },
+                      imageAlt: 'Logo ITC'
+                    }).then(() => {
+                      // Vô hiệu hóa nút quay
+                      document.querySelector('.hc-luckywheel-btn').style.pointerEvents = 'none';
+                      document.querySelector('.hc-luckywheel-btn').style.opacity = '0.5';
+                    }).catch(err => {
+                      console.error("Lỗi hiển thị popup:", err);
+                    });
+                  } else {
+                    // TRÚNG THƯỞNG - hiện form thu thập thông tin
+                    document.getElementById('prizeDisplayBox').textContent = `Bạn đã trúng: ${prizeText}`;
+                    document.getElementById('prizeFormModal').classList.add('active');
+                  }
+                }, 100);
+              }
+            });
+          },
+          false
+        );
+
+        function randomIndex(prizes) {
+          if (!isPercentage) {
+            return Math.floor(Math.random() * prizes.length);
+          }
+
+          let rand = Math.random();
+          let cumulativeProbability = 0;
+
+          console.log("🎲 Random value:", rand.toFixed(4));
+
+          for (let i = 0; i < prizes.length; i++) {
+            cumulativeProbability += prizes[i].percentpage;
+            console.log(`  Index ${i}: cumulative = ${cumulativeProbability.toFixed(4)}`);
+
+            if (rand < cumulativeProbability) {
+              console.log(`✅ Selected: Index ${i} - ${prizes[i].text}`);
+              return i;
+            }
+          }
+
+          console.warn("⚠️ Fallback to last prize");
+          return prizes.length - 1;
+        }
+
+        // XỬ LÝ FORM
+        document.getElementById('winnerForm').addEventListener('submit', async (e) => {
+          e.preventDefault();
+
+          const formData = {
+            name: document.getElementById('fullName').value,
+            phone: document.getElementById('phoneNumber').value,
+            address: document.getElementById('userAddress').value,
+            prize: currentPrizeText
+          };
+
+          // Hiện loading
+          document.getElementById('winnerForm').style.display = 'none';
+          document.getElementById('formLoading').classList.add('active');
+
+          try {
+            const response = await fetch(GOOGLE_SCRIPT_URL, {
+              method: 'POST',
+              mode: 'no-cors',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(formData)
+            });
+
+            // Do mode no-cors nên luôn thành công
+            setTimeout(() => {
+              document.getElementById('formLoading').classList.remove('active');
+              document.getElementById('prizeFormModal').classList.remove('active');
+
+              Swal.fire({
+                title: 'Thành công!',
+                text: 'Thông tin của bạn đã được ghi nhận. Đội ngũ admin sẽ nhanh chóng liên lạc với bạn để xác nhận thông tin giải thưởng!',
+                icon: 'success',
+                confirmButtonText: 'OK',
+                backdrop: false,
+                allowOutsideClick: false
+              }).then(() => {
+                document.getElementById('winnerForm').reset();
+                document.getElementById('winnerForm').style.display = 'block';
+
+                // Vô hiệu hóa nút quay
+                document.querySelector('.hc-luckywheel-btn').style.pointerEvents = 'none';
+                document.querySelector('.hc-luckywheel-btn').style.opacity = '0.5';
+              });
+            }, 1000);
+
+          } catch (error) {
+            document.getElementById('formLoading').classList.remove('active');
+            document.getElementById('winnerForm').style.display = 'block';
+
+            Swal.fire({
+              title: 'Lỗi!',
+              text: 'Không thể gửi thông tin. Vui lòng thử lại!',
+              icon: 'error',
+              confirmButtonText: 'OK',
+              backdrop: false,
+              allowOutsideClick: false
+            });
+          }
+        });
+
+        // Đóng modal
+        document.getElementById('cancelFormBtn').addEventListener('click', () => {
+          document.getElementById('prizeFormModal').classList.remove('active');
+          document.getElementById('winnerForm').reset();
+        });
+
+      </script>
+    </div>
+  </div>
+</body>
+
+</html>
